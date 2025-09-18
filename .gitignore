@@ -1,3 +1,5 @@
 /target
 .idea/
 Cargo.lock
+tinydb_data
+tinydb_data_test

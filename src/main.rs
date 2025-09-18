@@ -7,6 +7,7 @@ mod wal;
 mod pager;
 mod engine;
 mod util;
+mod bench;
 
 use engine::Engine;
 
@@ -55,6 +56,15 @@ fn main() -> anyhow::Result<()> {
             dev_tests::simple_crash_recovery()?;
             println!("Tests passed");
         }
+        "bench" => {
+            // usage: cargo run --release -- bench <ops> <key_prefix> <value_size>
+            let ops: usize = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(10000);
+            let key_prefix = args.get(3).cloned().unwrap_or_else(|| "k".to_string());
+            let val_size: usize = args.get(4).and_then(|s| s.parse().ok()).unwrap_or(100);
+            bench::run_bench(&data_dir, ops, &key_prefix, val_size)?;
+            println!("bench done");
+        }
+
         _ => println!("Unknown Command {}", cmd),
     }
     Ok(())

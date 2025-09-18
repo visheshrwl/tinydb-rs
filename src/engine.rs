@@ -6,8 +6,6 @@ use std::sync::{Arc, Mutex};
 
 use crate::wal::Wal;
 use crate::pager::{Pager, Page, PAGE_SIZE};
-use crate::wal::Lsn;
-use crate::util::crc32;
 
 /// Very small single-file KV engine on top of pages.
 /// Layout: each page stores multiple kvs as:
@@ -134,7 +132,7 @@ impl Engine {
 
         // find page with enough space
         let mut pid = *self.next_page.lock().unwrap();
-        let mut page = {
+        let page = {
             let mut p = self.pager.lock().unwrap();
             let mut page = p.read_page(pid)?;
             if (PAGE_SIZE - pager_hdr_sz()) < (page.used as usize + entry_len) {
@@ -186,7 +184,7 @@ impl Engine {
     }
 
     pub fn get(&mut self, key: &str) -> anyhow::Result<Option<Vec<u8>>> {
-        if let Some((pid, off, val_len)) = self.index.lock().unwrap().get(key).cloned() {
+        if let Some((pid, off, _val_len)) = self.index.lock().unwrap().get(key).cloned() {
             let mut p = self.pager.lock().unwrap();
             let page = p.read_page(pid)?;
             let off = off as usize;
